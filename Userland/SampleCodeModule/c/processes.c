@@ -20,9 +20,7 @@ void bloqueadoFunc(int argc, char* argv[]){
 		printf("Bloqueado sem_wait value: %d\n", sem_wait(sem));
 		printf("Bloqueado: Desbloqueado\n");
 		i = 0;
-		while(i++ < 100000000){
-		
-		}	
+		sleep(500);
 	}
 }
 
@@ -33,9 +31,7 @@ void liberadorFunc(int argc, char* argv[]){
 		printf("Liberador: Desbloqueando...\n");
 		printf("Liberador sem_post value: %d\n", sem_post(sem));
 		i = 0;
-		while(i++ < 500000000){
-		
-		}	
+		sleep(800);
 	}
 }
 
@@ -48,9 +44,7 @@ void hablaFunc(int argc, char* argv[]){
 		char* msg = "Hello world\0\n";
 		(void)pipe_write(fds[1], msg, 12);
 		i = 0;		
-		while(i++ < 500000000){
-
-		}
+		sleep(1000);
 	}
 }
 
@@ -63,9 +57,8 @@ void escuchaFunc(int argc, char* argv[]){
 		char buffer[64];
 		(void)pipe_read(fds[0], buffer, 12);
 		i = 0;
-		while(i++ < 100000000){
-			
-		}
+		printf("Escuchador received: %s\n", buffer);
+		sleep(1000);
 	}
 }
 
@@ -78,7 +71,7 @@ void loopFunc(int argc, char* argv[]){
 	int it = 0;
 	uint32_t time = unsigned_str_to_num(&it, 10, seconds);
 	while(1){
-		wait(18*time);
+		sleep(18*time);
 		printf("Pid from loop function: %d\n", buf);
 	}
 }

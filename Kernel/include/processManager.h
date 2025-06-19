@@ -30,6 +30,8 @@ typedef struct ProcessControlBlock {
     
     struct PCB* parent;         // For wait() logic
     struct PCB* next;           // For scheduling queue
+
+    uint8_t fd[2];
     
     uint8_t foreground;                 // 1 = foreground, 0 = background
     uint8_t waitingChildren;            // Track if wait() is needed. 1 = wait() needed, 0 = wait() not needed

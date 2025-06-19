@@ -223,8 +223,8 @@ void shell()
 
 		case TEST_PIPE:;
 			pid_t habla, escucha;
-			habla = (pid_t)createProcess(&hablaFunc, 1, argv);
 			escucha = (pid_t)createProcess(&escuchaFunc, 1, argv);
+			habla = (pid_t)createProcess(&hablaFunc, 1, argv);
 			break;
 
 		case SH:;

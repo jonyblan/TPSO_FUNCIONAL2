@@ -1,9 +1,10 @@
-#include <semaphore.h>
+
 #include <lib.h>
 #include <processManager.h>
 #include <PCBQueueADT.h>
 #include <scheduler.h>
-#define SEM_NAME_MATCH(name1, name2) (safe_strncpy((name1), (name2), MAX_NAME_LEN) == 0)
+#include <mySem.h>
+#define SEM_NAME_MATCH(name1, name2) (strcmp((name1), (name2)) == 0)
 
 
 NamedSemaphore namedSemaphores[MAX_SEMAPHORES];
@@ -24,7 +25,7 @@ uint8_t sem_open(const char* name, uint8_t initial_value) {
     if (!name) return -1;
 
     // First, search for existing
-    for (uint8_t i = 0; i < MAX_SEMAPHORES; i++) {
+    for (uint8_t i = 0; i < 5; i++) {
         if (namedSemaphores[i].inUse && SEM_NAME_MATCH(namedSemaphores[i].name, name)) {
             return i;
         }
@@ -50,17 +51,11 @@ int sem_post(uint8_t id) {
 
     Semaphore* sem = &namedSemaphores[id].sem;
     _cli();
-	int size = getPCBQueueSize(sem->waiters);
-    if (size > 0) {
+    if (getPCBQueueSize(sem->waiters) > 0) {
         PCB* p = dequeueProcess(sem->waiters);
-        unblockProcess(p); 
-    	_sti();
-		return size;
-    } 
-	else {
-    	_sti();
-        return sem->value++;
+        unblockProcess(p->pid); 
     }
+    sem->value++;
     _sti();
 	return sem->value;
 

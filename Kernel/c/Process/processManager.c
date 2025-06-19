@@ -191,7 +191,7 @@ int killProcess(uint8_t pid){
     return -1;
 }
 
-void yield(){/* int_20();*/ return; }
+void yield(){return;}
 
 void showRunningProcesses(){
     for (size_t i = 0; i < MAX_PROCESSES ; i++)

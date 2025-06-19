@@ -74,3 +74,24 @@ char *safe_strncpy(char *dest, const char *src, uint8_t max) {
     dest[i] = '\0'; // Ensure null termination
     return dest;
 }
+
+char *my_strcat(char *dest, const char *src) {
+    char *ptr = dest;
+
+    // Avanzar hasta el final de dest
+    while (*ptr != '\0') {
+        ptr++;
+    }
+
+    // Copiar src al final de dest
+    while (*src != '\0') {
+        *ptr = *src;
+        ptr++;
+        src++;
+    }
+
+    // Agregar el null terminator final
+    *ptr = '\0';
+
+    return dest;
+}

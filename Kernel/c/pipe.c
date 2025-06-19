@@ -4,6 +4,7 @@
 #include <processManager.h>
 #include <scheduler.h>
 #include <PCBQueueADT.h>
+#include <mySem.h>
 
 static Pipe pipes[MAX_PIPES];
 static PipeFD pipeFDs[MAX_PIPES * 2];  // cada pipe puede tener hasta 2 descriptores
@@ -32,14 +33,14 @@ static int allocateFD(Pipe* pipe, PipeEnd end) {
 }
 
 uint8_t pipe_open(const char* name, int fds[2]) {
-	/*if (!started) {
+	if (!started) {
 		initPipes();
 		started = 1;
-	}*/
+	}
 
-	//Pipe* pipe = NULL;
+	Pipe* pipe = NULL;
 
-/*
+
 	// Ver si ya existe
 	for (int i = 0; i < MAX_PIPES; i++) {
 		if (pipes[i].inUse && strcmp(pipes[i].name, name) == 0) {
@@ -47,21 +48,23 @@ uint8_t pipe_open(const char* name, int fds[2]) {
 			break;
 		}
 	}
-*/
-/*
+    
+    
 	// Si no existe, crearlo
 	if (!pipe) {
-		for (int i = 0; i < MAX_PIPES; i++) {
-			if (!pipes[i].inUse) {
-				pipe = &pipes[i];
+        for (int i = 0; i < MAX_PIPES; i++) {
+            if (!pipes[i].inUse) {
+                pipe = &pipes[i];
 				pipe->inUse = 1;
 				safe_strncpy(pipe->name, name, MAX_PIPE_NAME);
 				pipe->name[MAX_PIPE_NAME - 1] = '\0';  // Asegurar nul-terminación
 				pipe->readIdx = 0;
 				pipe->writeIdx = 0;
 				pipe->size = 0;
-				pipe->readersBlocked = CreatePCBQueueADT();
-				pipe->writersBlocked = CreatePCBQueueADT();
+                pipe->write_sem=sem_open(name, PIPE_BUFFER_SIZE-1);
+                name=my_strcat(name,"read");
+                pipe->read_sem=sem_open(name, 0);
+                resetBuffer(i);
 				break;
 			}
 		}
@@ -77,7 +80,7 @@ uint8_t pipe_open(const char* name, int fds[2]) {
 
 	fds[0] = readFD;
 	fds[1] = writeFD;
-*/
+
 	return 0;
 }
 
@@ -89,22 +92,13 @@ uint64_t pipe_write(int fd, const char* buf, uint64_t count) {
     int written = 0;
 
     while (written < count) {
-        while (pipe->size >= PIPE_BUFFER_SIZE) {
-            PCB* p = getCurrentProcess();
-            queueProcess(pipe->writersBlocked, p);
-            blockProcess(p);
-            yield();
-        }
+        sem_wait(pipe->write_sem);
 
         pipe->buffer[pipe->writeIdx] = buf[written];
         pipe->writeIdx = (pipe->writeIdx + 1) % PIPE_BUFFER_SIZE;
         pipe->size++;
         written++;
-
-        if (!isEmpty(pipe->readersBlocked)) {
-            //PCB* r = (PCB*)dequeueProcess(pipe->readersBlocked);
-            //unblockProcess(r);
-        }
+        sem_post(pipe->read_sem);
     }
 
     return written;
@@ -118,22 +112,12 @@ uint64_t pipe_read(int fd, char* buf, uint64_t count) {
     int read = 0;
 
     while (read < count) {
-        while (pipe->size == 0) {
-            PCB* p = getCurrentProcess();
-            queueProcess(pipe->readersBlocked, p);
-            blockProcess(p);
-            yield();
-        }
-
+        sem_wait(pipe->read_sem);
         buf[read] = pipe->buffer[pipe->readIdx];
         pipe->readIdx = (pipe->readIdx + 1) % PIPE_BUFFER_SIZE;
         pipe->size--;
         read++;
-
-        if (!isEmpty(pipe->writersBlocked)) {
-            //PCB* w = (PCB*)dequeueProcess(pipe->writersBlocked);
-            //unblockProcess(w);
-        }
+        sem_post(pipe->write_sem);
     }
 
     return read;
@@ -144,4 +128,11 @@ void pipe_close(int fd) {
         return;
 
     pipeFDs[fd].inUse = 0;
+}
+
+void resetBuffer(uint16_t fd){
+    for (size_t i = 0; i < PIPE_BUFFER_SIZE; i++)
+    {
+        pipeFDs[fd].pipe->buffer[i] = 0;
+    }
 }

@@ -69,6 +69,6 @@ int removeProcess(PCBQueueADT adt, PCB* PCB){
     return 0; // PCB not found
 }
 
-uint8_t getPCBQueueSize(PCBQueueADT adt){ return adt->size; }
+uint8_t getPCBQueueSize(PCBQueueADT adt){return adt->size; }
 
 uint8_t isEmpty(PCBQueueADT adt) { return adt->size <= 0; }

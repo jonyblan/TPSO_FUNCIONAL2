@@ -18,8 +18,9 @@ typedef struct {
     int writeIdx;
     int size;
 
-    void* readersBlocked; // PCBQueueADT
-    void* writersBlocked; // PCBQueueADT
+    uint8_t read_sem;
+    uint8_t write_sem;
+
 } Pipe;
 
 typedef struct {

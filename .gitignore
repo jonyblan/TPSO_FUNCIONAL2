@@ -1,0 +1,7 @@
+*.o
+*.bin
+*.img
+Image/x64BareBonesImage.vmdk
+Image/x64BareBonesImage.vmdk
+Kernel/c/Process/scheduler.o
+.vscode/settings.json

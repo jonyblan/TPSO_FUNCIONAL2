@@ -381,7 +381,7 @@ void toMinus(char *str)
     }
 }
 
-void wait(uint32_t ticks)
+void sleep(uint32_t ticks)
 {
     SYSCALL(7, ticks, 0, 0);
 }

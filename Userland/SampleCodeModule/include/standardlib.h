@@ -22,7 +22,7 @@ typedef struct
     uint8_t day;
 } TimeStamp;
 
-void wait(uint32_t ticks);
+void sleep(uint32_t ticks);
 uint32_t unsigned_str_to_num(uint64_t *it, uint64_t buff_length, char *buff);
 void unsigned_num_to_str(uint32_t num, uint32_t start, char *buff);
 char *strchr(const char *str, int c);
