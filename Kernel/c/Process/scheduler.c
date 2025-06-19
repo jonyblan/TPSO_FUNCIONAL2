@@ -54,10 +54,10 @@ void *schedule(void *rsp) {
     for (int8_t i = MAX_PRIO - 1; i >= 0; i--) {
         if (!isEmpty(scheduler->schedule[i]) && scheduler->count[i] <= (i * 5 + 1)) {
             next = dequeueProcess(scheduler->schedule[i]);
-			/* if(next->state != READY){
-				queueProcess(scheduler->schedule[next->priority], next);
-				continue;
-			} */
+            if(next->state != READY){
+              queueProcess(scheduler->schedule[next->priority], next);
+              continue;
+            }
             scheduler->currentRunningPCB = next;
             scheduler->currentRunningPCB->state = RUNNING;
             scheduler->count[i]++;
@@ -72,11 +72,15 @@ void *schedule(void *rsp) {
     // Segunda pasada después del reset
     for (int8_t i = MAX_PRIO - 1; i >= 0; i--) {
         if (!isEmpty(scheduler->schedule[i])) {
-            next = dequeueProcess(scheduler->schedule[i]);
-            scheduler->currentRunningPCB = next;
-            scheduler->currentRunningPCB->state = RUNNING;
-            scheduler->count[i]++;
-            return next->stackPointer;
+          if(next->state != READY){
+            queueProcess(scheduler->schedule[next->priority], next);
+            continue;
+          }  
+          next = dequeueProcess(scheduler->schedule[i]);
+          scheduler->currentRunningPCB = next;
+          scheduler->currentRunningPCB->state = RUNNING;
+          scheduler->count[i]++;
+          return next->stackPointer;
         }
     }
 
